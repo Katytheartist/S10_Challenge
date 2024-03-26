@@ -4,10 +4,10 @@ import {setFilters} from '../state/pizzaSlice'
 import { useGetOrdersQuery } from '../state/pizzaApi'
 
 export default function OrderList() {
-  const {data: orders, isLoading: ordersLoading, isFetching: ordersRefreshing} = useGetOrdersQuery()
-  //console.log(orders)
+  // const {data: orders, isLoading: ordersLoading, isFetching: ordersRefreshing} = useGetOrdersQuery()
+  console.log(data)
   // const ordersList = { "fullName": "Jane Doe", "size": "L", "toppings": ["1","2","3","4","5"] }
-  const size = useSelector(st => st.pizzaState.size)
+  const size = useSelector(st => st.filters)
   const dispatch = useDispatch()
   return (
     <div id="orderList">
