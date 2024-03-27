@@ -1,14 +1,21 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {  useSelector, useDispatch } from 'react-redux'
 import {setFilters} from '../state/pizzaSlice'
 import { useGetOrdersQuery } from '../state/pizzaApi'
 
 export default function OrderList() {
-  // const {data: orders, isLoading: ordersLoading, isFetching: ordersRefreshing} = useGetOrdersQuery()
-  console.log(data)
+   const {data: orders = [], isLoading: ordersLoading, isFetching: ordersRefreshing} = useGetOrdersQuery()
+  //  const [activeSize, setActiveSize] = useState('All')
+  console.log(orders)
   // const ordersList = { "fullName": "Jane Doe", "size": "L", "toppings": ["1","2","3","4","5"] }
-  const size = useSelector(st => st.filters)
+  const activeSize = useSelector(st => st.pizzaSlice.activeSize)
   const dispatch = useDispatch()
+  // const handleFilterClick = (size) =>{
+  //   setActiveSize(size)
+  // }
+
+  const filteredSize = orders && activeSize !== 'All' ? orders.filter(or => or.size == activeSize):orders
+
   return (
     <div id="orderList">
       <h2>Pizza Orders
@@ -16,11 +23,18 @@ export default function OrderList() {
       </h2>
       <ol>
         {
-          orders.map((or) => {
+          orders && filteredSize?.map((or) => {
+            
             return (
-              <li key={or.size}>
+              <li key={or.id}>
                 <div>
-                  order details here
+                  {or.customer} ordered a size {or.size} with {
+                  !or.toppings || or.toppings.length === 0
+                  ? 'No toppings'
+                  : or.toppings.length === 1
+                  ? '1 topping'
+                  : `${or.toppings.length} toppings`
+  }
                 </div>
               </li>
             )
@@ -30,13 +44,13 @@ export default function OrderList() {
       <div id="sizeFilters">
         Filter by size:
         {
-          ['All', 'S', 'M', 'L'].map(size => {
-            const className = `button-filter${size === 'All' ? ' active' : ''}`
+          ['All', 'S', 'M', 'L'].map((size, index) => {
+            const className = `button-filter${size === activeSize ? ' active' : ''}`
             return <button
               onClick={()=>dispatch(setFilters(size))}
               data-testid={`filterBtn${size}`}
               className={className}
-              key={size}>{size}</button>
+              key={index}>{size}</button>
           })
         }
       </div>

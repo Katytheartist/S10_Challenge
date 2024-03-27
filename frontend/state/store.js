@@ -1,14 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
 import pizzaReducer from './pizzaSlice'
 import {pizzaApi} from './pizzaApi'
+import pizzaSlice from './pizzaSlice'
 
 // const exampleReducer = (state = { count: 0 }) => {
 //   return state
 // }
 
-export const resetStore = () => configureStore({
+export const resetStore = () =>  configureStore({
   reducer: {
-    filters: pizzaReducer,
+    pizzaSlice: pizzaReducer,
     [pizzaApi.reducerPath]: pizzaApi.reducer,
   },
  
@@ -19,4 +20,5 @@ export const resetStore = () => configureStore({
   
 })
 
+//resetStore = () => 
 export const store = resetStore()

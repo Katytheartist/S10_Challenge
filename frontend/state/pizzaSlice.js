@@ -14,7 +14,7 @@ const initialState = {
     //         "Pineapple"
     //     ]
     // }],
-    filters: 'All',
+    activeSize: 'All'
 }
 
 export const pizzaSlice = createSlice({
@@ -22,11 +22,7 @@ export const pizzaSlice = createSlice({
     initialState,
     reducers: {
         setFilters: (state, action) => {
-            if (state.size === action.payload) {
-              state.size = null
-            } else {
-              state.size = action.payload
-            }
+          state.activeSize=action.payload
           },
         createOrder: {
           prepare(customer, size){
@@ -43,7 +39,7 @@ export const pizzaSlice = createSlice({
 })
 
 export const {
-    setFilters,
+    setFilters, createOrder
 } = pizzaSlice.actions
 
 export default pizzaSlice.reducer
