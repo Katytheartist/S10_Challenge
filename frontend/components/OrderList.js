@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 import {  useSelector, useDispatch } from 'react-redux'
 import {setFilters} from '../state/pizzaSlice'
 import { useGetOrdersQuery } from '../state/pizzaApi'

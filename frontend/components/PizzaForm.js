@@ -1,8 +1,10 @@
 import React, {useReducer} from 'react'
 import { useCreateOrderMutation } from '../state/pizzaApi'
 
-const CHANGE_INPUT = 'CHANGE_INPUT'
+const CHANGE_NAME = 'CHANGE_NAME'
+const CHANGE_SIZE = 'CHANGE_SIZE'
 const RESET_FORM = 'RESET_FORM'
+const TOPPING = 'TOPPING'
 
 const initialFormState = { // suggested
   fullName: '',
@@ -16,44 +18,56 @@ const initialFormState = { // suggested
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case CHANGE_INPUT: {
-      const {name, value} = action.payload
-      return {...state, [name]: value}
+    case CHANGE_NAME: {
+      return {...state, fullName: action.payload}
     }
+    case CHANGE_SIZE: {
+      return {...state, size: action.payload}
+    }
+    case TOPPING: return {...state, [action.payload]: !state[action.payload]}
     case RESET_FORM: 
-      return {
-      fullName: '', 
-      size: '',   
-      '1': false,
-      '2': false,
-      '3': false,
-      '4': false,
-      '5': false, }
+      return initialFormState 
       default:
         return state
-    
   }
 }
 
 export default function PizzaForm() {
   const [state, dispatch] = useReducer(reducer, initialFormState)
-  const [createOrder] = useCreateOrderMutation()
+  const [createOrder, {error: createOrderError, isLoading: orderLoading}] = useCreateOrderMutation()
 
-  const onChange = ({ target: { name, value } }) => {
-    dispatch({ type: CHANGE_INPUT, payload: { name, value } })
+  const currentToppings = Object.keys(state)
+  .filter(key => key !== 'fullName' && key !== 'size')
+  .filter(key => state[key])
+
+  const onSizeChange = evt =>  {
+    dispatch({type: CHANGE_SIZE, payload: evt.target.value})
   }
+  const onNameChange = ({target:{value}}) =>{
+    dispatch({type: CHANGE_NAME, payload: value})
+  }
+  const onToppingChange = (currentToppings) =>{
+    dispatch({type: TOPPING, payload: currentToppings})
+  }
+
   const resetForm = () => {
     dispatch({ type: RESET_FORM })
   }
 
-  const onNewOrder = evt => {
+  const onNewOrder = async evt => {
     evt.preventDefault()
-    const {authorName, quoteText} = state
-    createOrder({authorName, quoteText})
+    const {fullName, size} = state
+    const newCustomer = {
+      fullName: fullName,
+      size: size,
+      toppings: currentToppings
+    }
+
+    createOrder(newCustomer)
     .unwrap()
     .then(data =>{
       console.log(data)
-      resetForm()
+      resetForm(data)
     })
     .catch(err=>{
       console.log(err.message)
@@ -63,8 +77,8 @@ export default function PizzaForm() {
   return (
     <form onSubmit={onNewOrder}>
       <h2>Pizza Form</h2>
-      {true && <div className='pending'>Order in progress...</div>}
-      {true && <div className='failure'>Order failed: fullName is required</div>}
+      {orderLoading && <div className='pending'>Order in progress...</div>}
+      {createOrderError && <div className='failure'>{createOrderError.data.message} </div>}
 
       <div className="input-group">
         <div>
@@ -76,7 +90,7 @@ export default function PizzaForm() {
             placeholder="Type full name"
             type="text"
             value={state.fullName}
-            onChange={onChange}
+            onChange={onNameChange}
           />
         </div>
       </div>
@@ -88,7 +102,7 @@ export default function PizzaForm() {
           data-testid="sizeSelect" 
           id="size" 
           name="size"
-          onChange={onChange}
+          onChange={onSizeChange}
           value={state.size}>
             <option value="">----Choose size----</option>
             <option value="S">Small</option>
@@ -100,19 +114,44 @@ export default function PizzaForm() {
 
       <div className="input-group">
         <label>
-          <input data-testid="checkPepperoni" name="1" type="checkbox" />
+          <input 
+          data-testid="checkPepperoni" 
+          name="1" 
+          type="checkbox"
+          checked={state['1']}
+          onChange={()=> onToppingChange('1')} />
           Pepperoni<br /></label>
         <label>
-          <input data-testid="checkGreenpeppers" name="2" type="checkbox" />
+          <input 
+          data-testid="checkGreenpeppers" 
+          name="2" 
+          type="checkbox"
+          checked={state['2']}
+          onChange={()=> onToppingChange('2')}  />
           Green Peppers<br /></label>
         <label>
-          <input data-testid="checkPineapple" name="3" type="checkbox" />
+          <input 
+          data-testid="checkPineapple" 
+          name="3" 
+          type="checkbox"
+          checked={state['3']}
+          onChange={()=> onToppingChange('3')}  />
           Pineapple<br /></label>
         <label>
-          <input data-testid="checkMushrooms" name="4" type="checkbox" />
+          <input 
+          data-testid="checkMushrooms" 
+          name="4" 
+          type="checkbox"
+          checked={state['4']}
+          onChange={()=> onToppingChange('4')}  />
           Mushrooms<br /></label>
         <label>
-          <input data-testid="checkHam" name="5" type="checkbox" />
+          <input 
+          data-testid="checkHam" 
+          name="5" 
+          type="checkbox"
+          checked={state['5']}
+          onChange={()=> onToppingChange('5')}  />
           Ham<br /></label>
       </div>
       <input data-testid="submit" type="submit" />
